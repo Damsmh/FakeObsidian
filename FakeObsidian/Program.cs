@@ -1,5 +1,6 @@
+using Scalar.AspNetCore;
 
-namespace FakeObsidian
+namespace FakeObsidian.Api
 {
     public class Program
     {
@@ -10,6 +11,7 @@ namespace FakeObsidian
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            
 
             var app = builder.Build();
             if (app.Environment.IsDevelopment())
@@ -17,6 +19,13 @@ namespace FakeObsidian
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.MapScalarApiReference(options =>
+            {
+                options
+                    .WithTitle("FakeObsidian API")
+                    .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+            });
 
             app.UseHttpsRedirection();
 
