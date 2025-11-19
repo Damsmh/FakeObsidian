@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36623.8 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakeObsidian.Api", "FakeObsidian\FakeObsidian.Api.csproj", "{F1B9290D-78D0-41E9-B274-4EE2325E4FB3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakeObsidian.Application", "FakeObsidian.Application\FakeObsidian.Application.csproj", "{8E5A4919-AD82-41CE-8DB7-C63E74DC95AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakeObsidian.Domain", "FakeObsidian.Domain\FakeObsidian.Domain.csproj", "{D2394E21-CD7D-4669-A2DA-6787247476EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakeObsidian.Infrastructure", "FakeObsidian.Infrastructure\FakeObsidian.Infrastructure.csproj", "{E1763876-3C9C-4D79-BDA6-538941D4694E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F1B9290D-78D0-41E9-B274-4EE2325E4FB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1B9290D-78D0-41E9-B274-4EE2325E4FB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1B9290D-78D0-41E9-B274-4EE2325E4FB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1B9290D-78D0-41E9-B274-4EE2325E4FB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E5A4919-AD82-41CE-8DB7-C63E74DC95AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E5A4919-AD82-41CE-8DB7-C63E74DC95AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E5A4919-AD82-41CE-8DB7-C63E74DC95AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E5A4919-AD82-41CE-8DB7-C63E74DC95AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2394E21-CD7D-4669-A2DA-6787247476EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2394E21-CD7D-4669-A2DA-6787247476EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2394E21-CD7D-4669-A2DA-6787247476EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2394E21-CD7D-4669-A2DA-6787247476EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1763876-3C9C-4D79-BDA6-538941D4694E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1763876-3C9C-4D79-BDA6-538941D4694E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1763876-3C9C-4D79-BDA6-538941D4694E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1763876-3C9C-4D79-BDA6-538941D4694E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {886F73BD-BD29-4EF9-9342-AC2A37945BA4}
+	EndGlobalSection
+EndGlobal
