@@ -22,6 +22,8 @@ namespace FakeObsidian.Api.Controllers
         private readonly AppDbContext _db = db;
 
         [HttpPost("register")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegRequest model)
         {
             if (await _userManager.FindByNameAsync(model.UserName) != null)
@@ -29,16 +31,32 @@ namespace FakeObsidian.Api.Controllers
 
             var user = new AppUser { UserName = model.UserName, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded) return BadRequest(result.Errors);
+            if (!result.Succeeded) 
+                return BadRequest(result.Errors);
 
             if (!await _roleManager.RoleExistsAsync("User"))
                 await _roleManager.CreateAsync(new IdentityRole("User"));
 
             await _userManager.AddToRoleAsync(user, "User");
-            return Ok("Пользователь зарегистрирован");
+            var (accessToken, accessExp) = await CreateAccessTokenAsync(user);
+            var refresh = CreateRefreshToken();
+            refresh.UserId = user.Id;
+
+            _db.RefreshTokens.Add(refresh);
+            await _db.SaveChangesAsync();
+
+            return Ok(new
+            {
+                token = accessToken,
+                expiration = accessExp,
+                refreshToken = refresh.Token
+            });
         }
 
         [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] LogRequest model)
         {
             var user = await _userManager.FindByNameAsync(model.UserName);
@@ -63,6 +81,9 @@ namespace FakeObsidian.Api.Controllers
         }
 
         [HttpPost("refresh")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ValidationProblemDetails))]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.RefreshToken))
@@ -110,8 +131,8 @@ namespace FakeObsidian.Api.Controllers
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? user.Id),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new(JwtRegisteredClaimNames.Sub, user.UserName ?? user.Id),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
             claims.AddRange(userRoles.Select(r => new Claim(ClaimTypes.Role, r)));
 
