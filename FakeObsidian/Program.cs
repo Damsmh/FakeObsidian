@@ -112,15 +112,12 @@ namespace FakeObsidian.Api
             app.MapHub<ChatHub>("/hubs/ChatHub");
             app.MapControllers();
 
-            if (app.Environment.IsDevelopment())
+            app.MapScalarApiReference(options =>
             {
-                app.MapScalarApiReference(options =>
-                {
-                    options.WithTitle("FakeObsidian API")
-                           .WithTheme(ScalarTheme.Default)
-                           .WithOpenApiRoutePattern("/swagger/v1/swagger.json");
-                });
-            }
+                options.WithTitle("FakeObsidian API")
+                        .WithTheme(ScalarTheme.Default)
+                        .WithOpenApiRoutePattern("/swagger/v1/swagger.json");
+            });
 
             using var scope = app.Services.CreateScope();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
