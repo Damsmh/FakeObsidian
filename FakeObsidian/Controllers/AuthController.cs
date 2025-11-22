@@ -1,4 +1,6 @@
-﻿using FakeObsidian.Api.Models.User;
+﻿using AutoMapper;
+using FakeObsidian.Api.Models.Auth;
+using FakeObsidian.Api.Models.User;
 using FakeObsidian.Domain.Entities;
 using FakeObsidian.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
@@ -14,20 +16,21 @@ namespace FakeObsidian.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager,
-        IConfiguration configuration, AppDbContext db) : ControllerBase
+        IConfiguration configuration, AppDbContext db, IMapper mapper) : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager = userManager;
         private readonly RoleManager<IdentityRole> _roleManager = roleManager;
         private readonly IConfiguration _configuration = configuration;
         private readonly AppDbContext _db = db;
+        private readonly IMapper _mapper = mapper;
 
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegRequest model)
         {
-            if (await _userManager.FindByNameAsync(model.UserName) != null)
-                return BadRequest("Пользователь уже существует");
+            if (await _userManager.FindByNameAsync(model.Email) != null)
+                return BadRequest(new { Error = "Пользователь c таким email уже существует" });
 
             var user = new AppUser { UserName = model.UserName, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -45,12 +48,9 @@ namespace FakeObsidian.Api.Controllers
             _db.RefreshTokens.Add(refresh);
             await _db.SaveChangesAsync();
 
-            return Ok(new
-            {
-                token = accessToken,
-                expiration = accessExp,
-                refreshToken = refresh.Token
-            });
+            AuthResponse response = new() { Expiration = accessExp, Token = accessToken, RefreshToken = refresh.Token };
+
+            return Ok(response);
         }
 
         [HttpPost("login")]
@@ -60,10 +60,10 @@ namespace FakeObsidian.Api.Controllers
         public async Task<IActionResult> Login([FromBody] LogRequest model)
         {
             var user = await _userManager.FindByNameAsync(model.UserName);
-            if (user == null) return Unauthorized("Неверный логин или пароль");
+            if (user == null) return Unauthorized(new { Error = "Неверный логин или пароль" });
 
             if (!await _userManager.CheckPasswordAsync(user, model.Password))
-                return Unauthorized("Неверный логин или пароль");
+                return Unauthorized(new { Error = "Неверный логин или пароль" });
 
             var (accessToken, accessExp) = await CreateAccessTokenAsync(user);
             var refresh = CreateRefreshToken();
@@ -72,12 +72,8 @@ namespace FakeObsidian.Api.Controllers
             _db.RefreshTokens.Add(refresh);
             await _db.SaveChangesAsync();
 
-            return Ok(new
-            {
-                token = accessToken,
-                expiration = accessExp,
-                refreshToken = refresh.Token
-            });
+            AuthResponse response = new() { Expiration = accessExp, Token = accessToken, RefreshToken = refresh.Token };
+            return Ok(new { response });
         }
 
         [HttpPost("refresh")]
@@ -106,12 +102,48 @@ namespace FakeObsidian.Api.Controllers
             _db.RefreshTokens.Add(newRefresh);
             await _db.SaveChangesAsync();
 
-            return Ok(new
+            AuthResponse response = new() { Expiration = newAccessExp, Token = newAccessToken, RefreshToken = newRefresh.Token };
+
+            return Ok(new { response });
+        }
+
+        [HttpPost("logout")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+        {
+            if (!string.IsNullOrWhiteSpace(request.RefreshToken))
             {
-                token = newAccessToken,
-                expiration = newAccessExp,
-                refreshToken = newRefresh.Token
-            });
+                var token = _db.RefreshTokens
+                    .FirstOrDefault(rt => rt.Token == request.RefreshToken && rt.IsActive);
+
+                if (token != null)
+                {
+                    token.Revoked = DateTime.UtcNow;
+                    await _db.SaveChangesAsync();
+                }
+
+                return Ok();
+            }
+
+            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                         ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var userTokens = _db.RefreshTokens
+                    .Where(rt => rt.UserId == userId && rt.IsActive && rt.Revoked == null);
+
+                foreach (var t in userTokens)
+                {
+                    t.Revoked = DateTime.UtcNow;
+                }
+
+                await _db.SaveChangesAsync();
+            }
+
+            return Ok();
         }
 
         private static RefreshToken CreateRefreshToken()

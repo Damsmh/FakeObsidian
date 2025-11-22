@@ -1,5 +1,4 @@
-﻿using FakeObsidian.Api.Hubs;
-using FakeObsidian.Domain.Entities;
+﻿using FakeObsidian.Domain.Entities;
 using FakeObsidian.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -44,6 +43,7 @@ namespace FakeObsidian.Api
                 .AddEntityFrameworkStores<AppDbContext>();
 
             builder.Services.AddSignalR();
+            builder.Services.AddAutoMapper(cfg => { });
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
@@ -109,13 +109,12 @@ namespace FakeObsidian.Api
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapHub<ChatHub>("/hubs/ChatHub");
             app.MapControllers();
 
             app.MapScalarApiReference(options =>
             {
                 options.WithTitle("FakeObsidian API")
-                        .WithTheme(ScalarTheme.Default)
+                        .WithTheme(ScalarTheme.Purple)
                         .WithOpenApiRoutePattern("/swagger/v1/swagger.json");
             });
 
