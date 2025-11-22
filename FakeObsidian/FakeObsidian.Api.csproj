@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.11" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.10.3" />
@@ -22,6 +23,10 @@
     <ProjectReference Include="..\FakeObsidian.Application\FakeObsidian.Application.csproj" />
     <ProjectReference Include="..\FakeObsidian.Domain\FakeObsidian.Domain.csproj" />
     <ProjectReference Include="..\FakeObsidian.Infrastructure\FakeObsidian.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Hubs\" />
   </ItemGroup>
 
 </Project>
