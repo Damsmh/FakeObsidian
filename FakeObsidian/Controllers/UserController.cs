@@ -32,6 +32,8 @@ namespace FakeObsidian.Api.Controllers
                 result.Add(new UserDto
                 {
                     Id = user.Id,
+                    Avatar = user.Avatar,
+                    UserName = user.UserName,
                     Email = user.Email,
                     Roles = roles
                 });

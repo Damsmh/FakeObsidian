@@ -1,4 +1,5 @@
-﻿using FakeObsidian.Domain.Entities;
+﻿using FakeObsidian.Api.Mappings;
+using FakeObsidian.Domain.Entities;
 using FakeObsidian.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -14,7 +15,7 @@ namespace FakeObsidian.Api
     {
         public static async Task InitializeRoles(RoleManager<IdentityRole> roleManager)
         {
-            string[] roleNames = { "Admin", "User" };
+            string[] roleNames = ["Admin", "User"];
 
             foreach (var roleName in roleNames)
             {
@@ -43,7 +44,7 @@ namespace FakeObsidian.Api
                 .AddEntityFrameworkStores<AppDbContext>();
 
             builder.Services.AddSignalR();
-            builder.Services.AddAutoMapper(cfg => { });
+            builder.Services.AddAutoMapper(cfg => { }, typeof(UserProfile).Assembly);
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
@@ -70,7 +71,15 @@ namespace FakeObsidian.Api
             });
 
             builder.Services.AddAuthorization();
-
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.ListenAnyIP(80);
+                options.ListenAnyIP(443, listenOptions =>
+                {
+                    listenOptions.UseHttps("/etc/letsencrypt/live/otebis.ru/fullchain.pem",
+                                           "/etc/letsencrypt/live/otebis.ru/privkey.pem");
+                });
+            });
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FakeObsidian API", Version = "v1" });
