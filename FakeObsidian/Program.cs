@@ -33,6 +33,16 @@ namespace FakeObsidian.Api
 
             builder.Services.AddDbContext<AppDbContext>(opt =>
                 opt.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+            });
 
             builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
             {
@@ -75,6 +85,10 @@ namespace FakeObsidian.Api
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FakeObsidian API", Version = "v1" });
+                c.AddServer(new Microsoft.OpenApi.Models.OpenApiServer
+                {
+                    Url = "https://otebis.ru/"
+                });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
