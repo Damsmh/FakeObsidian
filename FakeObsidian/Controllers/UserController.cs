@@ -5,6 +5,8 @@ using FakeObsidian.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
+using System.Security.Claims;
 
 namespace FakeObsidian.Api.Controllers
 {
@@ -56,7 +58,7 @@ namespace FakeObsidian.Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetUser(string userId)
+        public async Task<ActionResult<List<UserResponse>>> GetUser(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return NotFound();
@@ -79,12 +81,11 @@ namespace FakeObsidian.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("{userId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserRequest request)
+        public async Task<IActionResult> UpdateUserbyId(string userId, [FromBody] UpdateUserRequest request)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return NotFound();
@@ -100,6 +101,29 @@ namespace FakeObsidian.Api.Controllers
 
             await _userManager.AddToRolesAsync(user, rolesToAdd);
             await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+
+            return NoContent();
+        }
+
+        [HttpPut("updateInfo")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateUserInfo([FromBody] UpdateUserRequest request)
+        {
+            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                         ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) return NotFound();
+                user.Avatar = request.Avatar;
+                user.UserName = request.UserName;
+                user.Email = request.Email;
+                await _userManager.UpdateAsync(user);
+            }
 
             return NoContent();
         }
@@ -120,5 +144,29 @@ namespace FakeObsidian.Api.Controllers
 
             return NoContent();
         }
+
+        //TODO: Add Notification system
+
+        //[HttpPut("addFriend")]
+        //[ProducesResponseType(StatusCodes.Status204NoContent)]
+        //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        //[ProducesResponseType(StatusCodes.Status403Forbidden)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public async Task<IActionResult> SendFriendInvite([FromBody] AddFriendRequest request)
+        //{
+        //    var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+        //                 ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        //    if (!string.IsNullOrEmpty(userId))
+        //    {
+        //        var user = await _userManager.FindByIdAsync(userId);
+        //        var newFriend = await _userManager.FindByIdAsync(request.Id);
+        //        if (user == null || newFriend == null) return NotFound();
+        //        newFriend.Notifications.Add(newFriend);
+        //        await _userManager.UpdateAsync(user);
+        //    }
+
+        //    return NoContent();
+        //}
     }
 }

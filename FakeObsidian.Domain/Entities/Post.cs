@@ -4,6 +4,7 @@
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Title { get; set; }
+        public string Image { get; set; } = "static/images/default.png";
         public string? Description { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

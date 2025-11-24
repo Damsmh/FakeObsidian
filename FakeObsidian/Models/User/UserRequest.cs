@@ -13,4 +13,16 @@ namespace FakeObsidian.Api.Models.User
         [Required]
         public List<string> Roles { get; set; }
     }
+
+    public class AddFriendRequest
+    {
+        [Required]
+        public string Id { get; set; }
+    }
+
+    public class RemoveFriendRequest
+    {
+        [Required]
+        public string Id { get; set; }
+    }
 }

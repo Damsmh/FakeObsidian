@@ -87,7 +87,7 @@ namespace FakeObsidian.Api
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FakeObsidian API", Version = "v1" });
                 c.AddServer(new Microsoft.OpenApi.Models.OpenApiServer
                 {
-                    Url = "https://otebis.ru/"
+                    Url = "https://otebis.ru:8443/"
                 });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
