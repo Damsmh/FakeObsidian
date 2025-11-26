@@ -29,7 +29,7 @@ namespace FakeObsidian.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegRequest model)
         {
-            if (await _userManager.FindByNameAsync(model.Email) != null)
+            if (await _userManager.FindByEmailAsync(model.Email) != null)
                 return BadRequest(new { Error = "Пользователь c таким email уже существует" });
 
             var user = new AppUser { UserName = model.UserName, Email = model.Email };

@@ -9,6 +9,8 @@ namespace FakeObsidian.Api.Models.User
         [Required]
         public string UserName { get; set; }
         [Required]
+        public string FullName { get; set; }
+        [Required]
         public string Email { get; set; }
         [Required]
         public List<string> Roles { get; set; }

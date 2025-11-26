@@ -36,6 +36,7 @@ namespace FakeObsidian.Api.Controllers
                     Id = user.Id,
                     Avatar = user.Avatar,
                     UserName = user.UserName,
+                    FullName = user.FullName,
                     Email = user.Email,
                     Roles = roles
                 });
@@ -96,6 +97,7 @@ namespace FakeObsidian.Api.Controllers
 
             user.Avatar = request.Avatar;
             user.UserName = request.UserName;
+            user.FullName = request.FullName;
             user.Email = request.Email;
             await _userManager.UpdateAsync(user);
 
@@ -121,6 +123,7 @@ namespace FakeObsidian.Api.Controllers
                 if (user == null) return NotFound();
                 user.Avatar = request.Avatar;
                 user.UserName = request.UserName;
+                user.FullName = request.FullName;
                 user.Email = request.Email;
                 await _userManager.UpdateAsync(user);
             }

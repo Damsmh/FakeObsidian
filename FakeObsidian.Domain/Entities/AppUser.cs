@@ -5,7 +5,7 @@ namespace FakeObsidian.Domain.Entities
     public class AppUser : IdentityUser
     {
         public string Avatar { get; set; } = "static/avatars/default.png";
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
         public int Reputation {  get; set; }
         public ICollection<Notification> Notifications { get; set; }
         public ICollection<AppUser> Friends { get; set; }
