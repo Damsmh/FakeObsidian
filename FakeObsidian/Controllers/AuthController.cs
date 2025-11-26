@@ -152,8 +152,8 @@ namespace FakeObsidian.Api.Controllers
             return new RefreshToken
             {
                 Token = Convert.ToBase64String(randomBytes),
-                Expires = DateTime.UtcNow.AddDays(7),
-                Created = DateTime.UtcNow
+                Expires = DateTime.Now.AddDays(7),
+                Created = DateTime.Now
             };
         }
 
@@ -172,7 +172,7 @@ namespace FakeObsidian.Api.Controllers
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var expires = DateTime.UtcNow.AddHours(1);
+            var expires = DateTime.Now.AddHours(1);
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],

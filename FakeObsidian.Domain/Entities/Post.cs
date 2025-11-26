@@ -6,8 +6,8 @@
         public string Title { get; set; }
         public string Image { get; set; } = "static/images/default.png";
         public string? Description { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
         public string OwnerId { get; set; }
         public AppUser Owner { get; set; }
