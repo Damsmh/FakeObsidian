@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System;
 
 namespace FakeObsidian.Api.Controllers
 {
@@ -47,8 +48,10 @@ namespace FakeObsidian.Api.Controllers
 
             _db.RefreshTokens.Add(refresh);
             await _db.SaveChangesAsync();
+            var moscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
+            var moscowExpiration = TimeZoneInfo.ConvertTimeFromUtc(accessExp, moscowZone);
 
-            AuthResponse response = new() { Expiration = accessExp, Token = accessToken, RefreshToken = refresh.Token };
+            AuthResponse response = new() { Expiration = moscowExpiration, Token = accessToken, RefreshToken = refresh.Token };
 
             return Ok(response);
         }
@@ -72,7 +75,10 @@ namespace FakeObsidian.Api.Controllers
             _db.RefreshTokens.Add(refresh);
             await _db.SaveChangesAsync();
 
-            AuthResponse response = new() { Expiration = accessExp, Token = accessToken, RefreshToken = refresh.Token };
+            var moscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
+            var moscowExpiration = TimeZoneInfo.ConvertTimeFromUtc(accessExp, moscowZone);
+
+            AuthResponse response = new() { Expiration = moscowExpiration, Token = accessToken, RefreshToken = refresh.Token };
             return Ok(new { response });
         }
 
@@ -102,7 +108,10 @@ namespace FakeObsidian.Api.Controllers
             _db.RefreshTokens.Add(newRefresh);
             await _db.SaveChangesAsync();
 
-            AuthResponse response = new() { Expiration = newAccessExp, Token = newAccessToken, RefreshToken = newRefresh.Token };
+            var moscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
+            var moscowExpiration = TimeZoneInfo.ConvertTimeFromUtc(newAccessExp, moscowZone);
+
+            AuthResponse response = new() { Expiration = moscowExpiration, Token = newAccessToken, RefreshToken = newRefresh.Token };
 
             return Ok(new { response });
         }
@@ -152,8 +161,8 @@ namespace FakeObsidian.Api.Controllers
             return new RefreshToken
             {
                 Token = Convert.ToBase64String(randomBytes),
-                Expires = DateTime.Now.AddDays(7),
-                Created = DateTime.Now
+                Expires = DateTime.UtcNow.AddDays(7),
+                Created = DateTime.UtcNow
             };
         }
 
@@ -172,7 +181,7 @@ namespace FakeObsidian.Api.Controllers
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var expires = DateTime.Now.AddHours(1);
+            var expires = DateTime.UtcNow.AddHours(1);
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],

@@ -14,6 +14,6 @@
         public string? GrantedById { get; set; }
         public AppUser? GrantedBy { get; set; }
 
-        public DateTime GrantedAt { get; set; } = DateTime.Now;
+        public DateTime GrantedAt { get; set; } = DateTime.UtcNow;
     }
 }
