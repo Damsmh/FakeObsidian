@@ -2,7 +2,7 @@
 {
     public class Notification
     {
-        public string Id = Guid.NewGuid().ToString();
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         public string UserId { get; set; }
         public AppUser User { get; set; }
         public string Content { get; set; }
