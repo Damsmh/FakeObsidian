@@ -10,7 +10,7 @@ using System.Security.Claims;
 
 namespace FakeObsidian.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     [Authorize]
     public class UserController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager,

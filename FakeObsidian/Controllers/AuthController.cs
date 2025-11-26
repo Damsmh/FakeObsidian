@@ -13,7 +13,7 @@ using System.Text;
 
 namespace FakeObsidian.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class AuthController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager,
         IConfiguration configuration, AppDbContext db, IMapper mapper) : ControllerBase

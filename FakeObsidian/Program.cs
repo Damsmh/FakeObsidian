@@ -85,10 +85,6 @@ namespace FakeObsidian.Api
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FakeObsidian API", Version = "v1" });
-                c.AddServer(new Microsoft.OpenApi.Models.OpenApiServer
-                {
-                    Url = "https://otebis.ru:8443/"
-                });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -126,17 +122,16 @@ namespace FakeObsidian.Api
 
             app.MapControllers();
 
-            app.MapScalarApiReference(options =>
+            app.MapScalarApiReference("", options =>
             {
                 options.WithTitle("FakeObsidian API")
                         .WithTheme(ScalarTheme.Purple)
                         .WithOpenApiRoutePattern("/swagger/v1/swagger.json");
             });
-
+            
             using var scope = app.Services.CreateScope();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             await InitializeRoles(roleManager);
-
             app.Run();
         }
     }
