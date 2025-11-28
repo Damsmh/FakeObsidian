@@ -3,20 +3,22 @@ using FakeObsidian.Api.Models.Auth;
 using FakeObsidian.Api.Models.User;
 using FakeObsidian.Domain.Entities;
 using FakeObsidian.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System;
 
 namespace FakeObsidian.Api.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class AuthController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager,
+    public class AuthController(
+        UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager,
         IConfiguration configuration, AppDbContext db, IMapper mapper) : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager = userManager;
@@ -26,106 +28,115 @@ namespace FakeObsidian.Api.Controllers
         private readonly IMapper _mapper = mapper;
 
         [HttpPost("register")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegRequest model)
         {
             if (await _userManager.FindByEmailAsync(model.Email) != null)
-                return BadRequest(new { Error = "Пользователь c таким email уже существует" });
+                return BadRequest(new { Error = "Пользователь с таким email уже существует" });
 
             var user = new AppUser { UserName = model.UserName, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded) 
+
+            if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
             if (!await _roleManager.RoleExistsAsync("User"))
                 await _roleManager.CreateAsync(new IdentityRole("User"));
 
             await _userManager.AddToRoleAsync(user, "User");
+
             var (accessToken, accessExp) = await CreateAccessTokenAsync(user);
-            var refresh = CreateRefreshToken();
-            refresh.UserId = user.Id;
+            var refresh = CreateRefreshToken(user.Id);
 
             _db.RefreshTokens.Add(refresh);
             await _db.SaveChangesAsync();
-            var moscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
-            var moscowExpiration = TimeZoneInfo.ConvertTimeFromUtc(accessExp, moscowZone);
 
-            AuthResponse response = new() { Expiration = moscowExpiration, Token = accessToken, RefreshToken = refresh.Token };
+            var moscowExpiration = ToMoscowTime(accessExp);
+
+            var response = new AuthResponse
+            {
+                Expiration = moscowExpiration,
+                Token = accessToken,
+                RefreshToken = refresh.Token
+            };
 
             return Ok(response);
         }
 
         [HttpPost("login")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] LogRequest model)
         {
             var user = await _userManager.FindByNameAsync(model.UserName);
-            if (user == null) return Unauthorized(new { Error = "Неверный логин или пароль" });
-
-            if (!await _userManager.CheckPasswordAsync(user, model.Password))
+            if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
                 return Unauthorized(new { Error = "Неверный логин или пароль" });
 
             var (accessToken, accessExp) = await CreateAccessTokenAsync(user);
-            var refresh = CreateRefreshToken();
-            refresh.UserId = user.Id;
+            var refresh = CreateRefreshToken(user.Id);
 
             _db.RefreshTokens.Add(refresh);
             await _db.SaveChangesAsync();
 
-            var moscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
-            var moscowExpiration = TimeZoneInfo.ConvertTimeFromUtc(accessExp, moscowZone);
+            var moscowExpiration = ToMoscowTime(accessExp);
 
-            AuthResponse response = new() { Expiration = moscowExpiration, Token = accessToken, RefreshToken = refresh.Token };
-            return Ok(new { response });
+            var response = new AuthResponse
+            {
+                Expiration = moscowExpiration,
+                Token = accessToken,
+                RefreshToken = refresh.Token
+            };
+
+            return Ok(response);
         }
 
+
         [HttpPost("refresh")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ValidationProblemDetails))]
+        [Authorize]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.RefreshToken))
                 return BadRequest();
 
-            var existing = _db.RefreshTokens
-                .FirstOrDefault(rt => rt.Token == request.RefreshToken);
+            var existing = await _db.RefreshTokens
+                .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken
+                                          && rt.Revoked == null
+                                          && rt.Expires > DateTime.UtcNow);
 
-            if (existing == null || !existing.IsActive)
+            if (existing == null)
                 return Unauthorized();
+
             existing.Revoked = DateTime.UtcNow;
 
             var user = await _userManager.FindByIdAsync(existing.UserId);
-            if (user == null) return Unauthorized();
+            if (user == null)
+                return Unauthorized();
 
             var (newAccessToken, newAccessExp) = await CreateAccessTokenAsync(user);
-            var newRefresh = CreateRefreshToken();
-            newRefresh.UserId = user.Id;
+            var newRefresh = CreateRefreshToken(user.Id);
 
             _db.RefreshTokens.Add(newRefresh);
             await _db.SaveChangesAsync();
 
-            var moscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
-            var moscowExpiration = TimeZoneInfo.ConvertTimeFromUtc(newAccessExp, moscowZone);
+            var moscowExpiration = ToMoscowTime(newAccessExp);
 
-            AuthResponse response = new() { Expiration = moscowExpiration, Token = newAccessToken, RefreshToken = newRefresh.Token };
+            var response = new AuthResponse
+            {
+                Expiration = moscowExpiration,
+                Token = newAccessToken,
+                RefreshToken = newRefresh.Token
+            };
 
-            return Ok(new { response });
+            return Ok(response);
         }
 
+        [Authorize]
         [HttpPost("logout")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
         {
             if (!string.IsNullOrWhiteSpace(request.RefreshToken))
             {
-                var token = _db.RefreshTokens
-                    .FirstOrDefault(rt => rt.Token == request.RefreshToken && rt.IsActive);
+                var token = await _db.RefreshTokens
+                    .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken
+                                              && rt.Revoked == null
+                                              && rt.Expires > DateTime.UtcNow);
 
                 if (token != null)
                 {
@@ -137,14 +148,17 @@ namespace FakeObsidian.Api.Controllers
             }
 
             var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
-                         ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                      ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (!string.IsNullOrEmpty(userId))
             {
-                var userTokens = _db.RefreshTokens
-                    .Where(rt => rt.UserId == userId && rt.IsActive && rt.Revoked == null);
+                var activeTokens = await _db.RefreshTokens
+                    .Where(r => r.UserId == userId
+                             && r.Revoked == null
+                             && r.Expires > DateTime.UtcNow)
+                    .ToListAsync();
 
-                foreach (var t in userTokens)
+                foreach (var t in activeTokens)
                 {
                     t.Revoked = DateTime.UtcNow;
                 }
@@ -155,14 +169,15 @@ namespace FakeObsidian.Api.Controllers
             return Ok();
         }
 
-        private static RefreshToken CreateRefreshToken()
+        private static RefreshToken CreateRefreshToken(string userId)
         {
             var randomBytes = RandomNumberGenerator.GetBytes(64);
             return new RefreshToken
             {
                 Token = Convert.ToBase64String(randomBytes),
                 Expires = DateTime.UtcNow.AddDays(7),
-                Created = DateTime.UtcNow
+                Created = DateTime.UtcNow,
+                UserId = userId
             };
         }
 
@@ -172,25 +187,33 @@ namespace FakeObsidian.Api.Controllers
 
             var claims = new List<Claim>
             {
-                new(JwtRegisteredClaimNames.Sub, user.UserName ?? user.Id),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new(JwtRegisteredClaimNames.Sub, user.Id),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new(JwtRegisteredClaimNames.Name, user.UserName ?? user.Id)
             };
-            claims.AddRange(userRoles.Select(r => new Claim(ClaimTypes.Role, r)));
+
+            claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             var jwtKey = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var expires = DateTime.UtcNow.AddHours(1);
+
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
                 expires: expires,
-                signingCredentials: creds
-            );
+                signingCredentials: creds);
 
             return (new JwtSecurityTokenHandler().WriteToken(token), expires);
+        }
+
+        private static DateTime ToMoscowTime(DateTime utcDateTime)
+        {
+            var moscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
+            return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, moscowZone);
         }
     }
 }

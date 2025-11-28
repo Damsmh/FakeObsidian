@@ -12,7 +12,5 @@ namespace FakeObsidian.Domain.Entities
 
         public string UserId { get; set; } = null!;
         public AppUser? User { get; set; }
-
-        public bool IsActive => Revoked == null && DateTime.UtcNow < Expires;
     }
 }
