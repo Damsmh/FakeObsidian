@@ -8,6 +8,8 @@ variables:
 
 build:
   stage: build
+  variables:
+    DOCKER_BUILDKIT: "1"
   tags:
     - C#
     - fobsi
