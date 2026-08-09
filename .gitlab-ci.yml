@@ -19,7 +19,8 @@ build:
   before_script:
     - echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
   script:
-    - docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest -f FakeObsidian/Dockerfile .
+    - docker pull $IMAGE_NAME:latest || true
+    - docker build --cache-from $IMAGE_NAME:latest -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest -f FakeObsidian/Dockerfile .
     - docker push $IMAGE_NAME:$IMAGE_TAG
     - docker push $IMAGE_NAME:latest
   only:
