@@ -12,6 +12,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=${ENVIRONMENT}
       - ConnectionStrings__PostgreSQL=Host=fakeobsidian.postgres;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD};Pooling=true;MinPoolSize=10;MaxPoolSize=150;Keepalive=60
       - ConnectionStrings__Redis=fakeobsidian.redis:6379
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
     depends_on:
       fakeobsidian.postgres:
         condition: service_healthy
