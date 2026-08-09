@@ -8,6 +8,9 @@ variables:
 
 build:
   stage: build
+  tags:
+    - C#
+    - fobsi
   image: docker:24
   services:
     - docker:24-dind
@@ -22,6 +25,9 @@ build:
 
 deploy:
   stage: deploy
+  tags:
+    - C#
+    - fobsi
   image: docker:24
   services:
     - docker:24-dind
