@@ -3,7 +3,7 @@ stages:
   - deploy
 
 variables:
-  IMAGE_NAME: ghcr.io/Damsmh/fakeobsidian
+  IMAGE_NAME: ghcr.io/$GHCR_USER/fakeobsidian
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
 
 build:
