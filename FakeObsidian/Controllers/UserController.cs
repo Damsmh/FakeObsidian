@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FakeObsidian.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/users")]
     [ApiController]
     [Authorize]
     public class UserController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager,
@@ -18,7 +18,7 @@ namespace FakeObsidian.Api.Controllers
         private readonly RoleManager<IdentityRole> _roleManager = roleManager;
         private readonly IMapper _mapper = mapper;
 
-        [HttpGet("getAll")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
