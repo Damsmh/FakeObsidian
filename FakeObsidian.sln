@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36623.8
+# Visual Studio Version 18
+VisualStudioVersion = 18.8.12023.21 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakeObsidian.Api", "FakeObsidian\FakeObsidian.Api.csproj", "{F1B9290D-78D0-41E9-B274-4EE2325E4FB3}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakeObsidian.Infrastructure
 		{8E5A4919-AD82-41CE-8DB7-C63E74DC95AD} = {8E5A4919-AD82-41CE-8DB7-C63E74DC95AD}
 		{D2394E21-CD7D-4669-A2DA-6787247476EC} = {D2394E21-CD7D-4669-A2DA-6787247476EC}
 	EndProjectSection
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{E1763876-3C9C-4D79-BDA6-538941D4694E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1763876-3C9C-4D79-BDA6-538941D4694E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1763876-3C9C-4D79-BDA6-538941D4694E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
