@@ -1,6 +1,6 @@
 services:
   fakeobsidian.api:
-    image: ghcr.io/Damsmh/fakeobsidian:latest
+    image: ghcr.io/damsmh/fakeobsidian:latest
     build:
       context: .
       dockerfile: FakeObsidian/Dockerfile
