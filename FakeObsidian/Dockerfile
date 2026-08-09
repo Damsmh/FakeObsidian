@@ -4,10 +4,8 @@ USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 
-
 # Этот этап используется для сборки проекта службы
 FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
-LABEL org.opencontainers.image.source="https://github.com/Damsmh/FakeObsidian"
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["FakeObsidian/FakeObsidian.Api.csproj", "FakeObsidian/"]
@@ -34,6 +32,7 @@ ENTRYPOINT ["dotnet-ef", "database", "update", \
 
 # Этот этап используется в рабочей среде или при запуске из VS в обычном режиме (по умолчанию, когда конфигурация отладки не используется)
 FROM base AS final
+LABEL org.opencontainers.image.source="https://github.com/Damsmh/FakeObsidian"
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "FakeObsidian.Api.dll"]
