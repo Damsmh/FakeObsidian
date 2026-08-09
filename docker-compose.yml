@@ -1,6 +1,6 @@
 services:
   fakeobsidian.api:
-    image: ${CI_REGISTRY_IMAGE}:${IMAGE_TAG:-latest}
+    image: ghcr.io/Damsmh/fakeobsidian:latest
     build:
       context: .
       dockerfile: FakeObsidian/Dockerfile
