@@ -8,6 +8,7 @@ EXPOSE 8081
 
 # Этот этап используется для сборки проекта службы
 FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
+LABEL org.opencontainers.image.source="https://github.com/Damsmh/FakeObsidian"
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["FakeObsidian/FakeObsidian.Api.csproj", "FakeObsidian/"]
