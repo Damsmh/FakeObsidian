@@ -48,6 +48,8 @@ deploy:
       JWT_AUDIENCE=$JWT_AUDIENCE
       EOF
     - docker compose pull
-    - docker compose up -d
+    - docker compose up -d fakeobsidian.postgres fakeobsidian.redis
+    - docker compose run --rm fakeobsidian.migrations
+    - docker compose up -d fakeobsidian.api
   only:
     - master

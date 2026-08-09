@@ -21,6 +21,15 @@ services:
       fakeobsidian.redis:
         condition: service_healthy
 
+  fakeobsidian.migrations:
+    image: ${IMAGE_NAME}:migrations
+    container_name: fakeobsidian-migrations
+    environment:
+      - ConnectionStrings__PostgreSQL=Host=fakeobsidian.postgres;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+    depends_on:
+      fakeobsidian.postgres:
+        condition: service_healthy
+
   fakeobsidian.postgres:
     image: postgres:17-alpine
     container_name: fakeobsidian-postgres

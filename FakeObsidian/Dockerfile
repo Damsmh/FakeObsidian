@@ -25,6 +25,14 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./FakeObsidian.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+FROM build AS migrations
+WORKDIR /src
+RUN dotnet tool install --global dotnet-ef --version 9.*
+ENV PATH="$PATH:/root/.dotnet/tools"
+ENTRYPOINT ["dotnet-ef", "database", "update", \
+            "--project", "FakeObsidian.Infrastructure/FakeObsidian.Infrastructure.csproj", \
+            "--startup-project", "FakeObsidian/FakeObsidian.Api.csproj"]
+
 # Этот этап используется в рабочей среде или при запуске из VS в обычном режиме (по умолчанию, когда конфигурация отладки не используется)
 FROM base AS final
 WORKDIR /app
