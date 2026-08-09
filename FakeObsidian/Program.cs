@@ -106,7 +106,6 @@ namespace FakeObsidian.Api
             app.UseSwagger();
             app.MapSwagger();
 
-            app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
 
