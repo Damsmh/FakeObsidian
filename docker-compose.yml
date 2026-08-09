@@ -26,6 +26,9 @@ services:
     container_name: fakeobsidian-migrations
     environment:
       - ConnectionStrings__PostgreSQL=Host=fakeobsidian.postgres;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
     depends_on:
       fakeobsidian.postgres:
         condition: service_healthy
