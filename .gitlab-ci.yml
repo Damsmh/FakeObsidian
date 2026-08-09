@@ -43,6 +43,9 @@ deploy:
       DB_NAME=fakeobsidian
       DB_USER=fobsi
       DB_PASSWORD=saeFDHKYTV
+      JWT_KEY=$JWT_KEY
+      JWT_ISSUER=$JWT_ISSUER
+      JWT_AUDIENCE=$JWT_AUDIENCE
       EOF
     - docker compose pull
     - docker compose up -d
