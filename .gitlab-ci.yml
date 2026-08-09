@@ -28,12 +28,19 @@ deploy:
   tags:
     - C#
     - fobsi
-  image: docker:24
-  services:
-    - docker:24-dind
   before_script:
     - echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
   script:
+    - |
+      cat > .env <<EOF
+      IMAGE_NAME=$IMAGE_NAME
+      IMAGE_TAG=$IMAGE_TAG
+      ENVIRONMENT=Development
+      API_PORT=6784
+      DB_NAME=fakeobsidian
+      DB_USER=fobsi
+      DB_PASSWORD=saeFDHKYTV
+      EOF
     - docker compose pull
     - docker compose up -d
   only:
